@@ -1,0 +1,11 @@
+# Default values for momo-store.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+backend:
+  image:  
+    tag: ""
+
+frontend:
+  image:  
+    tag: ""
+
