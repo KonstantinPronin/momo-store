@@ -25,7 +25,7 @@ spec:
         {{- include "frontend.selectorLabels" . | nindent 8 }}
     spec:
       imagePullSecrets:
-        - name: {{ .Values.imagePullSecrets.name | default "docker-config-secret" }}
+        - name: "{{ .Chart.Name }}-{{ .Values.imagePullSecrets.name }}"
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

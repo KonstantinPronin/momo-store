@@ -1,16 +1,16 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
-  - project: 'templates/ci'
-    file: 'DockerInDockerTemplate.yml'
-    
+  - project: "templates/ci"
+    file: "DockerInDockerTemplate.yml"
+
 variables:
-  VERSION: 1.0.${CI_PIPELINE_ID}  
+  VERSION: 1.0.${CI_PIPELINE_ID}
 
 stages:
   - verify
   - test
   - build
-  - deploy  
+  - deploy
 
 spotbugs-sast:
   stage: verify
@@ -22,7 +22,7 @@ sonarqube:
   stage: verify
   rules:
     - changes:
-        - backend/*        
+        - backend/*
   image: sonarsource/sonar-scanner-cli:latest
   script:
     - cd backend
@@ -34,11 +34,11 @@ sonarqube:
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONARQUBE_LOGIN}
 
-go-test: 
+go-test:
   stage: test
   rules:
     - changes:
-        - backend/* 
+        - backend/*
   image: golang:1.17.13-bullseye
   script:
     - cd backend
@@ -62,4 +62,34 @@ build-image:
       --build-arg VERSION=${VERSION}
       --tag $CI_REGISTRY_IMAGE/momo-store-backend:$VERSION
       .
-    - docker push $CI_REGISTRY_IMAGE/momo-store-backend:$VERSION    
+    - docker push $CI_REGISTRY_IMAGE/momo-store-backend:$VERSION
+
+deploy-k8s:
+  stage: deploy
+  rules:
+    - changes:
+        - backend/*
+  needs:
+    - build-image
+  environment:
+    name: production-backend 
+  image:
+    name: alpine/k8s:1.24.13
+  before_script:
+    - mkdir ~/.kube
+    - echo ${KUBECONFIG} > ~/.kube/config 
+  script:
+    - |
+      kubectl config use-context yc-k8s-zonal-admin --namespace=default
+
+      helm repo add nexus ${NEXUS_HELM_BACKEND_REPO} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD}
+      helm repo update
+     
+      helm upgrade --install momo-store-backend \
+      --kube-context yc-k8s-zonal-admin \
+      --namespace default \
+      --set image.tag="${VERSION}" \
+      --set imagePullSecrets.value="${IMAGE_PULL_SECRET}" \
+      --atomic --timeout 15m nexus/momo-store-backend
+  after_script:
+    - rm ~/.kube/config

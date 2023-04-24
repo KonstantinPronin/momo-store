@@ -11,7 +11,7 @@ data:
     http {
       server {
 
-        listen 8081;
+        listen {{ .Values.service.port }};
 
         location / {
           root   /usr/share/nginx/html;
@@ -19,8 +19,8 @@ data:
           try_files $uri $uri/ /index.html;
         }
 
-        location /api {
-            proxy_pass http://{{ .Release.Name }}-backend:8081;
+        location ~ ^/(?:products|categories|orders|metrics|auth/whoami) {
+            proxy_pass http://{{ .Values.backendEndpoint }};
         }
       }
     }

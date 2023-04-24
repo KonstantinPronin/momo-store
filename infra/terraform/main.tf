@@ -4,6 +4,7 @@ provider "yandex" {
   zone      = var.availability_zone
 }
 
+### network ###
 resource "yandex_vpc_network" "k8s-default" {
   folder_id = var.folder_id
   name      = "k8s-default"
@@ -16,6 +17,7 @@ resource "yandex_vpc_subnet" "k8s-default" {
   network_id     = yandex_vpc_network.k8s-default.id
 }
 
+### accounts ###
 resource "yandex_iam_service_account" "k8s-resources" {
   folder_id = var.folder_id
 
@@ -65,6 +67,7 @@ resource "yandex_resourcemanager_folder_iam_member" "images-puller" {
   member = "serviceAccount:${yandex_iam_service_account.k8s-nodes.id}"
 }
 
+### security ###
 resource "yandex_kms_symmetric_key" "kms-key" {
   name              = "kms-key"
   default_algorithm = "AES_128"
@@ -79,6 +82,7 @@ resource "yandex_kms_symmetric_key_iam_binding" "viewer" {
   ]
 }
 
+### k8s-cluster ###
 resource "yandex_kubernetes_cluster" "k8s-zonal" {
   name       = "k8s-zonal"
   network_id = yandex_vpc_network.k8s-default.id
@@ -108,6 +112,7 @@ resource "yandex_kubernetes_cluster" "k8s-zonal" {
   ]
 }
 
+### nodes ###
 resource "yandex_kubernetes_node_group" "k8s-node-group" {
   cluster_id = yandex_kubernetes_cluster.k8s-zonal.id
   name       = "k8s-node-group"
