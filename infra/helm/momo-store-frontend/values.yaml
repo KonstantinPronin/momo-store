@@ -1,4 +1,4 @@
-# Default values for backend.
+# Default values for frontend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -6,22 +6,39 @@ replicaCount: 1
 podsMaxUnavailable: 1
 nameOverride: ""
 fullnameOverride: ""
+nginxConfigMapName: "helm-nginx-config"
 
 image:
-  repository: gitlab.praktikum-services.ru:5050/std-011/momo-store/momo-store-backend
+  repository: gitlab.praktikum-services.ru:5050/std-011/momo-store/momo-store-frontend
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: ""
 
 imagePullSecrets:
   name: docker-config-secret
   key: .dockerconfigjson
-  value: ewoJImF1dGhzIjogewoJCSJnaXRsYWIucHJha3Rpa3VtLXNlcnZpY2VzLnJ1OjUwNTAiOiB7CgkJCSJhdXRoIjogIlpYSmhhMmh0WlhSNmVXRnViM1k2TlZrNWNESnlSM05RUVcxSFVIST0iCgkJfQoJfQp9
+  value: ""
   type: kubernetes.io/dockerconfigjson
 
 service:
   type: ClusterIP
   port: 8081
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: momo-store.internal
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 resources: 
   # We usually recommend not to specify default resources and to leave this as a conscious
