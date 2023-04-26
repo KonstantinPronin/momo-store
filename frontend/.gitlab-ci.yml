@@ -54,3 +54,33 @@ build-image:
       --tag $CI_REGISTRY_IMAGE/momo-store-frontend:$VERSION
       .
     - docker push $CI_REGISTRY_IMAGE/momo-store-frontend:$VERSION
+
+deploy-k8s:
+  stage: deploy
+  rules:
+    - changes:
+        - frontend/*
+  needs:
+    - build-image
+  environment:
+    name: production-frontend
+  image:
+    name: alpine/k8s:1.24.13
+  before_script:
+    - mkdir ~/.kube
+    - echo ${KUBECONFIG} > ~/.kube/config 
+  script:
+    - |
+      kubectl config use-context yc-k8s-zonal-admin --namespace=default
+
+      helm repo add nexus ${NEXUS_HELM_FRONTEND_REPO} --username ${NEXUS_USERNAME} --password ${NEXUS_PASSWORD}
+      helm repo update
+     
+      helm upgrade --install momo-store-frontend \
+      --kube-context yc-k8s-zonal-admin \
+      --namespace default \
+      --set image.tag="${VERSION}" \
+      --set imagePullSecrets.value=${IMAGE_PULL_SECRET} \
+      --atomic --timeout 15m nexus/momo-store-frontend
+  after_script:
+    - rm ~/.kube/config
