@@ -166,3 +166,122 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
     auto_repair  = false
   }
 }
+
+### s3 ###
+// Create SA
+resource "yandex_iam_service_account" "s3-sa" {
+  folder_id = var.folder_id
+  name      = "s3-sa"
+}
+
+// Grant permissions
+resource "yandex_resourcemanager_folder_iam_member" "sa-editor" {
+  folder_id = var.folder_id
+  role      = "storage.editor"
+  member    = "serviceAccount:${yandex_iam_service_account.s3-sa.id}"
+}
+
+// Create Static Access Keys
+resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
+  service_account_id = yandex_iam_service_account.s3-sa.id
+  description        = "static access key for object storage"
+}
+
+// Use keys to create bucket
+resource "yandex_storage_bucket" "momo-store-std-011-009" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket     = "momo-store-std-011-009"
+  acl        = "public-read"
+  max_size   = 1073741824
+}
+
+// Momo images
+resource "yandex_storage_object" "momo-img-1" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-1"
+  source       = "../data/4bdaeab0ee1842dc888d87d4a435afdd.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-2" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-2"
+  source       = "../data/8b50f76f514a4ccaaacdcb832a1b3a2f.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-3" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-3"
+  source       = "../data/8dee5a92281746aa887d6f19cf9fdcc7.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-4" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-4"
+  source       = "../data/32cc88a33c3243a6a8838c034878c564.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-5" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-5"
+  source       = "../data/50b583271fa0409fb3d8ffc5872e99bb.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-6" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-6"
+  source       = "../data/788c073d83c14b3fa00675306dfb32b5.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-7" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-7"
+  source       = "../data/7685ad7e9e634a58a4c29120ac5a5ee1.jpg"
+  content_type = "image/jpeg"
+}
+
+resource "yandex_storage_object" "momo-img-8" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket       = yandex_storage_bucket.momo-store-std-011-009.bucket
+  acl          = "public-read"
+  key          = "momo-img-8"
+  source       = "../data/f64dcea998e34278a0006e0a2b104710.jpg"
+  content_type = "image/jpeg"
+}
