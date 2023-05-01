@@ -1,0 +1,29 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: grafana
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt  
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: 
+      - grafana.std-011-009.ru
+      secretName: letsencrypt-grafana
+  rules:
+  - host: grafana.std-011-009.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
